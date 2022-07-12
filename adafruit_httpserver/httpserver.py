@@ -20,13 +20,12 @@ Implementation Notes
 """
 
 try:
-    from typing import Any, Callable
+    from typing import Any
 except ImportError:
     pass
 
-from adafruit_httpserver.httprequest import _HTTPRequest
-from adafruit_httpserver.httpresponse import HTTPResponse
-from adafruit_httpserver.httpstatus import HTTPStatus
+from adafruit_httpserver.webapplication import WebApplication
+from adafruit_httpserver.webservergateway import WebServerGateway
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_HTTPServer.git"
@@ -43,11 +42,8 @@ class HTTPServer:
         :param socket: An object that is a source of sockets. This could be a `socketpool`
           in CircuitPython or the `socket` module in CPython.
         """
-        self._buffer = bytearray(1024)
-        self.routes = {}
-        self._socket_source = socket_source
-        self._sock = None
-        self.root_path = "/"
+        self.application = WebApplication("/", debug=False)
+        self.gateway = WebServerGateway(self.application, socket_source, debug=False)
 
     def route(self, path: str, method: str = "GET"):
         """Decorator used to add a route.
@@ -55,35 +51,31 @@ class HTTPServer:
         :param str path: filename path
         :param str method: HTTP method: "GET", "POST", etc.
 
+        A callable route should accept the following args:
+            (request: HTTPRequest))
+        A callable route should return a HTTPResponse object:
+            -> HTTPResponse:
+
         Example::
 
             @server.route(path, method)
-            def route_func(request):
+            def route_func(request: HTTPRequest) -> HTTPResponse:
                 return HTTPResponse(body="hello world")
         """
+        methods = [method]
+        rule = path
+        return lambda func: self.application.register_route(methods, rule, func)
 
-        def route_decorator(func: Callable) -> Callable:
-            self.routes[_HTTPRequest(path, method)] = func
-            return func
-
-        return route_decorator
-
-    def serve_forever(self, host: str, port: int = 80, root: str = "") -> None:
+    def serve_forever(self, host: str, port: int = 80) -> None:
         """Wait for HTTP requests at the given host and port. Does not return.
 
         :param str host: host name or IP address
         :param int port: port
         :param str root: root directory to serve files from
         """
-        self.start(host, port, root)
+        self.gateway.serve_forever(host, port)
 
-        while True:
-            try:
-                self.poll()
-            except OSError:
-                continue
-
-    def start(self, host: str, port: int = 80, root: str = "") -> None:
+    def start(self, host: str, port: int = 80) -> None:
         """
         Start the HTTP server at the given host and port. Requires calling
         poll() in a while loop to handle incoming requests.
@@ -92,13 +84,7 @@ class HTTPServer:
         :param int port: port
         :param str root: root directory to serve files from
         """
-        self.root_path = root
-
-        self._sock = self._socket_source.socket(
-            self._socket_source.AF_INET, self._socket_source.SOCK_STREAM
-        )
-        self._sock.bind((host, port))
-        self._sock.listen(10)
+        self.gateway.start_server(host, port)
 
     def poll(self):
         """
@@ -106,19 +92,4 @@ class HTTPServer:
         check for new incoming client requests. When a request comes in,
         the application callable will be invoked.
         """
-        conn, _ = self._sock.accept()
-        with conn:
-            length, _ = conn.recvfrom_into(self._buffer)
-
-            request = _HTTPRequest(raw_request=self._buffer[:length])
-
-            # If a route exists for this request, call it. Otherwise try to serve a file.
-            route = self.routes.get(request, None)
-            if route:
-                response = route(request)
-            elif request.method == "GET":
-                response = HTTPResponse(filename=request.path, root=self.root_path)
-            else:
-                response = HTTPResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR)
-
-            response.send(conn)
+        self.gateway.poll_server()

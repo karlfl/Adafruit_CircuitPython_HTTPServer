@@ -8,12 +8,10 @@ Circuit Python HTTP Server HTTP Response class.
 * Author(s): Karl Fleischmann
 """
 try:
-    from typing import Any, Optional
+    from typing import Optional
 except ImportError:
     pass
 
-from errno import EAGAIN, ECONNRESET
-import os
 
 from adafruit_httpserver.httpstatus import HTTPStatus
 from adafruit_httpserver.mimetype import MIMEType
@@ -21,14 +19,6 @@ from adafruit_httpserver.mimetype import MIMEType
 
 class HTTPResponse:
     """Details of an HTTP response. Use in @`HTTPServer.route` decorator functions."""
-
-    _HEADERS_FORMAT = (
-        "HTTP/1.1 {}\r\n"
-        "Content-Type: {}\r\n"
-        "Content-Length: {}\r\n"
-        "Connection: close\r\n"
-        "\r\n"
-    )
 
     def __init__(
         self,
@@ -38,6 +28,7 @@ class HTTPResponse:
         body: str = "",
         filename: Optional[str] = None,
         root: str = "",
+        headers: Optional[dict[str, str]] = None,
     ) -> None:
         """Create an HTTP response.
 
@@ -45,62 +36,73 @@ class HTTPResponse:
           Common statuses are available in `HTTPStatus`.
         :param str content_type: The MIME type of the data being returned.
           Common MIME types are available in `MIMEType`.
+        :param list headers (): a list of tuples to represent the headers.
+            ex [("header-name", "header value"),("header-name", "header value")]
         :param Union[str|bytes] body:
           The data to return in the response body, if ``filename`` is not ``None``.
         :param str filename: If not ``None``,
           return the contents of the specified file, and ignore ``body``.
         :param str root: root directory for filename, without a trailing slash
         """
-        self.status = status
-        self.content_type = content_type
-        self.body = body.encode() if isinstance(body, str) else body
-        self.filename = filename
+        self._status = status
+        self._content_type = (
+            content_type if not filename else MIMEType.mime_type(filename)
+        )
+        self._headers = headers or []
+        self._body = body
+        # ensure path contains trailing slash
+        self._root = root.rstrip("/") + "/"
+        # ensure filename doesn't start with slash
+        self._filename = filename.lstrip("/") if filename else None
+        self._filepath = self._root + self._filename if self._filename else None
+        self._body = body.encode() if isinstance(body, str) else body
+        self._root = root
 
-        self.root = root
-
-    def send(self, conn: Any) -> None:
-        # TODO: Use Union[SocketPool.Socket | socket.socket] for the type annotation in some way.
-        """Send the constructed response over the given socket."""
-        if self.filename:
+        # if this is a file, load the body with it's contents
+        if self._filepath is not None:
             try:
-                file_length = os.stat(self.root + self.filename)[6]
-                self._send_file_response(conn, self.filename, self.root, file_length)
+                with open(self._filepath, "rb") as file:
+                    self._body = file.read()
             except OSError:
-                self._send_response(
-                    conn,
-                    HTTPStatus.NOT_FOUND,
-                    MIMEType.TEXT_PLAIN,
-                    f"{HTTPStatus.NOT_FOUND} {self.filename}\r\n",
-                )
-        else:
-            self._send_response(conn, self.status, self.content_type, self.body)
+                self._status = HTTPStatus.NOT_FOUND
+                self._content_type = (MIMEType.TEXT_PLAIN,)
+                self._body = f"{HTTPStatus.NOT_FOUND} {self._filepath}\r\n"
 
-    def _send_response(self, conn, status, content_type, body):
-        self._send_bytes(
-            conn, self._HEADERS_FORMAT.format(status, content_type, len(body))
-        )
-        self._send_bytes(conn, body)
+    @property
+    def status(self) -> str:
+        """
+        the HTTP Headers for this response
+        """
+        return self._status
 
-    def _send_file_response(self, conn, filename, root, file_length):
-        self._send_bytes(
-            conn,
-            self._HEADERS_FORMAT.format(
-                self.status, MIMEType.mime_type(filename), file_length
-            ),
-        )
-        with open(root + filename, "rb") as file:
-            while bytes_read := file.read(8192):
-                self._send_bytes(conn, bytes_read)
+    @property
+    def headers(self) -> dict[str, str]:
+        """
+        the HTTP Headers for this response
+        """
+        headers = [
+            ("Content-Type", self._content_type),
+            ("Content-Length", str(len(self._body))),
+        ] + self._headers
+        return headers
 
-    def _send_bytes(self, conn, buf):  # pylint: disable=no-self-use
-        bytes_sent = 0
-        bytes_to_send = len(buf)
-        view = memoryview(buf)
-        while bytes_sent < bytes_to_send:
-            try:
-                bytes_sent += conn.send(view[bytes_sent:])
-            except OSError as exc:
-                if exc.errno == EAGAIN:
-                    continue
-                if exc.errno == ECONNRESET:
-                    return
+    @property
+    def body(self) -> bytes:
+        """
+        the HTTP Body for this response
+        """
+        return self._body
+
+    @property
+    def filename(self):
+        """
+        the file to be used for this response
+        """
+        return self._filename
+
+    @property
+    def rootfolder(self):
+        """
+        the file to be used for this response
+        """
+        return self._root
