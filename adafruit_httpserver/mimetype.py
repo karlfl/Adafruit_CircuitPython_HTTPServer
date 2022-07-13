@@ -5,7 +5,7 @@
 ====================================================
 Circuit Python HTTP Server MIME Type convenience class.
 
-* Author(s): Karl Fleischmann
+* Author(s): Dan Halbert
 """
 
 

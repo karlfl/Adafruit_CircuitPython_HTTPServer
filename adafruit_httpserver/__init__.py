@@ -1,24 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (c) 2022 Karl Fleischmann
+# SPDX-FileCopyrightText: Copyright (c) 2022 Dan Halbert for Adafruit Industries
+#
 # SPDX-License-Identifier: MIT
-"""
-================================================================================
-`WebServer`
-Simple Web (http) Server for CircuitPython that implements the PEP3333 standard
-
-* Author(s): Karl Fleischmann
-
-Implementation Notes
---------------------
-
-Adapted from
-    https://github.com/adafruit/Adafruit_CircuitPython_HTTPServer
-    https://github.com/adafruit/Adafruit_CircuitPython_WSGI
-
-**Software and Dependencies:**
-
-* Adafruit CircuitPython firmware for the supported boards:
-  https://github.com/adafruit/circuitpython/releases
-"""
 
 from adafruit_httpserver.httpstatus import HTTPStatus
 from adafruit_httpserver.mimetype import MIMEType
