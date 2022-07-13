@@ -1,4 +1,5 @@
-# SPDX-FileCopyrightText: Copyright (c) 2022 Karl Fleischmann
+# SPDX-FileCopyrightText: Copyright (c) 2022 Dan Halbert for Adafruit Industries
+#
 # SPDX-License-Identifier: MIT
 
 from adafruit_httpserver.httpstatus import HTTPStatus
