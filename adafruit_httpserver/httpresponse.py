@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`adafruit_httpserver.httprequest`
+`HTTPResponse`
 ====================================================
 Circuit Python HTTP Server HTTP Response class.
 

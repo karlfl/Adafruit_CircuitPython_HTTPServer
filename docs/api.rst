@@ -4,17 +4,22 @@
 .. If your library file(s) are nested in a directory (e.g. /adafruit_foo/foo.py)
 .. use this format as the module name: "adafruit_foo.foo"
 
-.. automodule:: adafruit_httpserver.httpserver
+.. module:: adafruit_httpserver.httpserver
+.. autoClass:: HTTPServer
     :members:
 
-.. automodule:: adafruit_httpserver.httprequest
+.. module:: adafruit_httpserver.httprequest
+.. autoClass:: HTTPRequest
     :members:
 
-.. automodule:: adafruit_httpserver.httpresponse
+.. module:: adafruit_httpserver.httpresponse
+.. autoClass:: HTTPResponse
     :members:
 
-.. automodule:: adafruit_httpserver.httpstatus
+.. module:: adafruit_httpserver.httpstatus
+.. autoClass:: HTTPStatus
     :members:
 
-.. automodule:: adafruit_httpserver.mimetype
+.. module:: adafruit_httpserver.mimetype
+.. autoClass:: MIMEType
     :members:

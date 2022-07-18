@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`adafruit_httpserver`
+`HTTPServer`
 ================================================================================
 
 Simple HTTP Server for CircuitPython

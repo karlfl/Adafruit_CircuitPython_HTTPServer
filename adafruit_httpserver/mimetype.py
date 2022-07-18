@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2022 Karl Fleischmann
 # SPDX-License-Identifier: MIT
 """
-`adafruit_httpserver.mimetype`
+`MIMETYpe`
 ====================================================
 Circuit Python HTTP Server MIME Type convenience class.
 

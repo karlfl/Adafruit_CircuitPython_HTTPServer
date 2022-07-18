@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`circuitpython.HttpStatus`
+`HttpStatus`
 ====================================================
 Circuit Python Web Server HTTP Status Code convenience class.
 
