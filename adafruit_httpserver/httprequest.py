@@ -17,7 +17,7 @@ import re
 
 
 class HTTPRequest:
-    """Details of an HTTP request. Use in @`HTTPServer.route` decorator functions."""
+    """Details of an HTTP request. Use in `HTTPServer.route` decorator functions."""
 
     def __init__(self, environ: Dict[str, str]) -> None:
         self._path = environ["PATH_INFO"]
@@ -39,14 +39,16 @@ class HTTPRequest:
     @property
     def method(self) -> str:
         """
-        the HTTP Method Type of this request
+        The HTTP Method Type of this request
+
         """
         return self._method
 
     @property
     def path(self) -> str:
         """
-        the path this request was made to
+
+        The path this request  
         """
         return self._path
 

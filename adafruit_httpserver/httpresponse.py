@@ -19,7 +19,7 @@ from adafruit_httpserver.mimetype import MIMEType
 
 
 class HTTPResponse:
-    """Details of an HTTP response. Use in @`HTTPServer.route` decorator functions."""
+    """Details of an HTTP response. Use in `HTTPServer.route` decorator functions."""
 
     def __init__(
         self,

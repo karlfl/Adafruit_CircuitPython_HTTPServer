@@ -9,7 +9,6 @@ Circuit Python Web Server HTTP Status Code convenience class.
 * Author(s): Dan Halbert
 """
 
-
 class HTTPStatus:  # pylint: disable=too-few-public-methods
     """HTTP status codes."""
 
@@ -28,9 +27,11 @@ class HTTPStatus:  # pylint: disable=too-few-public-methods
     def __str__(self):
         return f"{self.value} {self.phrase}"
 
+    @property
+    def NOT_FOUND () -> "HTTPStatus":
+        """404 Not Found"""
+        return HTTPStatus(404, "Not Found")
 
-HTTPStatus.NOT_FOUND = HTTPStatus(404, "Not Found")
-"""404 Not Found"""
 HTTPStatus.OK = HTTPStatus(200, "OK")  # pylint: disable=invalid-name
 """200 OK"""
 HTTPStatus.INTERNAL_SERVER_ERROR = HTTPStatus(500, "Internal Server Error")

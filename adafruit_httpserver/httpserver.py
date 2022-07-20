@@ -51,9 +51,9 @@ class HTTPServer:
         :param str path: filename path
         :param str method: HTTP method: "GET", "POST", etc.
 
-        A callable route should accept the following args:
-            (request: HTTPRequest))
-        A callable route should return a HTTPResponse object:
+        A callable route should accept the following args
+            (request: HTTPRequest)
+        A callable route should return an HTTPResponse object
             -> HTTPResponse:
 
         Example::
